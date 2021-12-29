@@ -3,6 +3,7 @@ package com.clonecoding.clone_airbnb
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.clonecoding.clone_airbnb.constants.MapConstants
 import com.clonecoding.clone_airbnb.databinding.ActivityMainBinding
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
@@ -22,8 +23,8 @@ class MainActivity : AppCompatActivity() {
      */
     private val mapReadyCallback = OnMapReadyCallback {
         naverMap = it
-        naverMap.maxZoom = 18.0
-        naverMap.minZoom = 10.0
+        naverMap.maxZoom = MapConstants.MAX_ZOOM
+        naverMap.minZoom = MapConstants.MIN_ZOOM
 
         val cameraUpdate = CameraUpdate.scrollTo(LatLng(37.49191767667589, 127.00769456278235))
         naverMap.moveCamera(cameraUpdate)
