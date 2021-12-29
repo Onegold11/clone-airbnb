@@ -20,7 +20,7 @@
 		</activity>
 		<meta-data
 			android:name="com.naver.maps.map.CLIENT_ID"
-			android:value="oxovev01qz" />
+			android:value="@string/naver_map_client_id" />
 	</application>
 
 </manifest>
