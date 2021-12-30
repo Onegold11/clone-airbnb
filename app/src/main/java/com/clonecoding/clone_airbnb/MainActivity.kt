@@ -1,13 +1,19 @@
 package com.clonecoding.clone_airbnb
 
+import android.graphics.Color
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.clonecoding.clone_airbnb.constants.MapConstants
+import com.clonecoding.clone_airbnb.data.HouseDto
 import com.clonecoding.clone_airbnb.databinding.ActivityMainBinding
+import com.clonecoding.clone_airbnb.viewmodel.MainViewModel
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
+import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.util.FusedLocationSource
+import com.naver.maps.map.util.MarkerIcons
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var naverMap: NaverMap
 
     private lateinit var locationSource: FusedLocationSource
+
+    private val viewModel: MainViewModel by viewModels()
 
     /**
      * Naver map ready callback
@@ -37,6 +45,8 @@ class MainActivity : AppCompatActivity() {
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
         naverMap.locationSource = this.locationSource
+
+        this.viewModel.requestHouseList()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +58,23 @@ class MainActivity : AppCompatActivity() {
                 supportFragmentManager.beginTransaction().add(R.id.mapView, it).commit()
             }
         mapFragment.getMapAsync(this.mapReadyCallback)
+
+        this.viewModel.houseList.observe(this, {
+            updateMarker(it)
+        })
+    }
+
+    private fun updateMarker(dto: HouseDto) {
+        dto[0].items.forEach{ house ->
+            val marker = Marker().apply {
+
+                position = LatLng(house.lat, house.lng)
+                map = naverMap
+                tag = house.id
+                icon = MarkerIcons.BLACK
+                iconTintColor = Color.RED
+            }
+        }
     }
 
     /**
