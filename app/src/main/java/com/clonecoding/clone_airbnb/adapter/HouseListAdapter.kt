@@ -12,8 +12,7 @@ import com.bumptech.glide.Glide
 import com.clonecoding.clone_airbnb.R
 import com.clonecoding.clone_airbnb.data.HouseDtoItem
 
-class HouseViewPagerAdapter :
-    ListAdapter<HouseDtoItem, HouseViewPagerAdapter.ItemViewHolder>(differ) {
+class HouseListAdapter : ListAdapter<HouseDtoItem, HouseListAdapter.ItemViewHolder>(differ) {
 
     inner class ItemViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
 
@@ -33,13 +32,7 @@ class HouseViewPagerAdapter :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ItemViewHolder(
-            inflater.inflate(
-                R.layout.item_house_detail_for_viewpager,
-                parent,
-                false
-            )
-        )
+        return ItemViewHolder(inflater.inflate(R.layout.item_house_detail_for_viewpager, parent, false))
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
