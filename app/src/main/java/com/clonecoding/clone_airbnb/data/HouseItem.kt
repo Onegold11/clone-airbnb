@@ -3,7 +3,7 @@ package com.clonecoding.clone_airbnb.data
 
 import com.google.gson.annotations.SerializedName
 
-data class Item(
+data class HouseItem(
     @SerializedName("id")
     val id: Int,
     @SerializedName("imgUrl")

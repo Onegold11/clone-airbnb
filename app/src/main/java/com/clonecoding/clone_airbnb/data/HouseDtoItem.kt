@@ -7,5 +7,5 @@ data class HouseDtoItem(
     @SerializedName("id")
     val id: String,
     @SerializedName("items")
-    val items: List<Item>
+    val items: List<HouseItem>
 )

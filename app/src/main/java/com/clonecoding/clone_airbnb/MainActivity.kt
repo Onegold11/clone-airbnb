@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.viewpager2.widget.ViewPager2
+import com.clonecoding.clone_airbnb.adapter.HouseViewPagerAdapter
 import com.clonecoding.clone_airbnb.constants.MapConstants
 import com.clonecoding.clone_airbnb.data.HouseDto
 import com.clonecoding.clone_airbnb.databinding.ActivityMainBinding
@@ -25,6 +27,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var locationSource: FusedLocationSource
 
     private val viewModel: MainViewModel by viewModels()
+
+    private val viewPager : ViewPager2 by lazy {
+        findViewById(R.id.houseViewPager)
+    }
+
+    private val viewPagerAdapter = HouseViewPagerAdapter()
 
     /**
      * Naver map ready callback
@@ -61,7 +69,10 @@ class MainActivity : AppCompatActivity() {
 
         this.viewModel.houseList.observe(this, {
             updateMarker(it)
+            viewPagerAdapter.submitList(it[0].items)
         })
+
+        this.viewPager.adapter = this.viewPagerAdapter
     }
 
     private fun updateMarker(dto: HouseDto) {
