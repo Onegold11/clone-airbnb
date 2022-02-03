@@ -96,6 +96,7 @@ obj/
 .idea/gradle.xml
 .idea/jarRepositories.xml
 .idea/navEditor.xml
+.idea/sonarlint/*
 
 # OS-specific files
 .DS_Store
