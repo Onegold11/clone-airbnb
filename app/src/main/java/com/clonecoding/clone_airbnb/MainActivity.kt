@@ -1,5 +1,6 @@
 package com.clonecoding.clone_airbnb
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -46,7 +47,15 @@ class MainActivity : AppCompatActivity() {
     /**
      * 뷰 페이저 어댑터
      */
-    private val viewPagerAdapter = HouseViewPagerAdapter()
+    private val viewPagerAdapter = HouseViewPagerAdapter(itemClick = {
+
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, "[Test extra text] : ${it.title} ${it.price} ${it.imgUrl}")
+            type = "text/plain"
+        }
+        startActivity(Intent.createChooser(intent, null))
+    })
 
     /**
      * 리싸이클러 뷰 어댑터
@@ -147,6 +156,8 @@ class MainActivity : AppCompatActivity() {
             updateMarker(it)
             viewPagerAdapter.submitList(it)
             recyclerAdapter.submitList(it)
+
+            this@MainActivity.binding.bottomSheet.bottomSheetTitleTextView.text = "${it.size} 개의 장소"
         })
     }
 

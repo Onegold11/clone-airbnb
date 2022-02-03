@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide
 import com.clonecoding.clone_airbnb.R
 import com.clonecoding.clone_airbnb.data.HouseDtoItem
 
-class HouseViewPagerAdapter :
+class HouseViewPagerAdapter(val itemClick: (HouseDtoItem) -> Unit) :
     ListAdapter<HouseDtoItem, HouseViewPagerAdapter.ItemViewHolder>(differ) {
 
     inner class ItemViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
@@ -24,6 +24,10 @@ class HouseViewPagerAdapter :
 
             titleTextView.text = house.title
             priceTextView.text = house.price
+
+            view.setOnClickListener {
+                itemClick(house)
+            }
 
             Glide.with(thumbnailImageView.context)
                 .load(house.imgUrl)
