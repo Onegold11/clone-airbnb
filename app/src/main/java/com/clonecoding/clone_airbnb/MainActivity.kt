@@ -5,6 +5,9 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
+import com.clonecoding.clone_airbnb.adapter.HouseListAdapter
 import com.clonecoding.clone_airbnb.adapter.HouseViewPagerAdapter
 import com.clonecoding.clone_airbnb.constants.MapConstants
 import com.clonecoding.clone_airbnb.data.HouseDto
@@ -13,10 +16,17 @@ import com.clonecoding.clone_airbnb.viewmodel.MainViewModel
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.Overlay
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.util.MarkerIcons
+import com.naver.maps.map.widget.LocationButtonView
 
 class MainActivity : AppCompatActivity() {
+
+    /**
+     * 데이터 바인딩
+     */
+    private lateinit var binding: ActivityMainBinding
 
     /**
      * Naver map object
@@ -39,6 +49,13 @@ class MainActivity : AppCompatActivity() {
     private val viewPagerAdapter = HouseViewPagerAdapter()
 
     /**
+     * 리싸이클러 뷰 어댑터
+     */
+    private val recyclerAdapter = HouseListAdapter()
+
+    private lateinit var currentLocationButton: LocationButtonView
+
+    /**
      * Naver map ready callback
      */
     private val mapReadyCallback = OnMapReadyCallback {
@@ -50,10 +67,12 @@ class MainActivity : AppCompatActivity() {
         naverMap.moveCamera(cameraUpdate)
 
         val uiSetting = naverMap.uiSettings
-        uiSetting.isLocationButtonEnabled = true
+        uiSetting.isLocationButtonEnabled = false
         uiSetting.isCompassEnabled = true
         uiSetting.isScaleBarEnabled = true
         uiSetting.isZoomControlEnabled = true
+
+        this.currentLocationButton.map = naverMap
 
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
         naverMap.locationSource = this.locationSource
@@ -61,10 +80,29 @@ class MainActivity : AppCompatActivity() {
         this.viewModel.requestHouseList()
     }
 
+    /**
+     * 마커 클릭 리스너
+     */
+    private val mapOverlayListener = Overlay.OnClickListener { overly ->
+
+        val selectedModel = viewPagerAdapter.currentList.firstOrNull {
+            it.id == overly.tag
+        }
+        selectedModel?.let {
+            val position = viewPagerAdapter.currentList.indexOf(it)
+            binding.houseViewPager.currentItem = position
+        }
+
+        return@OnClickListener true
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding: ActivityMainBinding =
             DataBindingUtil.setContentView(this, R.layout.activity_main)
+
+        this.binding = binding
+        this.currentLocationButton = binding.currentLocationButton
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapView) as MapFragment?
             ?: MapFragment.newInstance().also {
@@ -73,6 +111,29 @@ class MainActivity : AppCompatActivity() {
         mapFragment.getMapAsync(this.mapReadyCallback)
 
         binding.houseViewPager.adapter = this.viewPagerAdapter
+
+        binding.bottomSheet.recyclerView.apply {
+            adapter = this@MainActivity.recyclerAdapter
+            layoutManager = LinearLayoutManager(this@MainActivity)
+        }
+
+        binding.houseViewPager.registerOnPageChangeCallback(object :
+                ViewPager2.OnPageChangeCallback() {
+
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+
+                    val selectedHouseModel = viewPagerAdapter.currentList[position]
+                    val cameraUpdate = CameraUpdate.scrollTo(
+                        LatLng(
+                            selectedHouseModel.lat.toDouble(),
+                            selectedHouseModel.lng.toDouble()
+                        )
+                    ).animate(CameraAnimation.Easing)
+
+                    this@MainActivity.naverMap.moveCamera(cameraUpdate)
+                }
+            })
 
         this.initViewModel()
     }
@@ -85,6 +146,7 @@ class MainActivity : AppCompatActivity() {
         this.viewModel.houseList.observe(this, {
             updateMarker(it)
             viewPagerAdapter.submitList(it)
+            recyclerAdapter.submitList(it)
         })
     }
 
@@ -100,6 +162,7 @@ class MainActivity : AppCompatActivity() {
                 tag = house.id
                 icon = MarkerIcons.BLACK
                 iconTintColor = Color.RED
+                onClickListener = mapOverlayListener
             }
         }
     }
